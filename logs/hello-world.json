@@ -1,0 +1,22 @@
+{
+  "task": "hello-world",
+  "instruction": "Create hello.txt with Hello world",
+  "success": true,
+  "turns": [
+    {
+      "turn": 1,
+      "tools": []
+    },
+    {
+      "turn": 2,
+      "tools": [
+        "write"
+      ]
+    },
+    {
+      "turn": 3,
+      "tools": []
+    }
+  ],
+  "totalTools": 1
+}
