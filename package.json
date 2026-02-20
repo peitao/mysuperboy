@@ -1,0 +1,23 @@
+{
+  "name": "mysuperboy",
+  "version": "0.1.0",
+  "description": "基于 pi-mono 的终端编码 Agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "npx tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@mariozechner/pi-agent-core": "file:../pi-mono/packages/agent",
+    "@mariozechner/pi-ai": "file:../pi-mono/packages/ai",
+    "@mariozechner/pi-coding-agent": "file:../pi-mono/packages/coding-agent",
+    "@sinclair/typebox": "^0.34.48"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
