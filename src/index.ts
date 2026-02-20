@@ -1,7 +1,7 @@
 /**
  * mysuperboy - 基于 pi-mono 的终端编码 Agent
  * 
- * 支持自定义 skills 和 tools
+ * 支持懒加载 Skills（启动加载头部，按需读取完整内容）
  */
 
 import { createAgentSession, SessionManager } from "@mariozechner/pi-coding-agent";
@@ -14,30 +14,25 @@ async function main() {
   
   console.error(`🤖 mysuperboy: ${instruction}`);
   
-  // 加载 Skills
+  // 懒加载 Skills（只加载头部）
   const skillsDir = join(process.cwd(), "skills");
   const skillManager = new SkillManager(skillsDir);
-  await skillManager.loadSkills();
-  await skillManager.init();
+  await skillManager.loadSkillsMeta();
 
   // 获取 OpenRouter 模型
   const model = getModel("openrouter", "auto");
   console.error("📦 Model:", model?.id);
-  
-  // 获取自定义 tools
-  const customTools = skillManager.getCustomTools();
-  console.error("🔧 Custom tools:", customTools.map(t => t.name).join(", "));
 
   try {
-    // 创建会话，传入自定义 tools
+    // 创建会话
     const { session } = await createAgentSession({
       sessionManager: SessionManager.inMemory(),
       cwd: process.cwd(),
       model: model,
-      customTools: customTools,
     });
     console.error("✅ Session created");
 
+    // 订阅事件
     session.subscribe((event) => {
       switch (event.type) {
         case "message_update":
@@ -60,11 +55,11 @@ async function main() {
       }
     });
 
-    // 如果有 skill prompts，先发送
-    const skillPrompts = skillManager.getPrompts();
-    if (skillPrompts.length > 0) {
-      console.error("📝 Sending skill prompts...");
-      await session.prompt(skillPrompts.join("\n"));
+    // 发送 skills 元数据（懒加载的核心！）
+    const skillPrompt = skillManager.getSystemPrompt();
+    if (skillPrompt) {
+      console.error("📝 Sending skills meta...");
+      await session.prompt(skillPrompt);
     }
     
     // 执行用户指令
