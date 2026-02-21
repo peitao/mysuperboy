@@ -5,17 +5,27 @@
   "turns": [
     {
       "turn": 1,
-      "tools": []
+      "tools": [],
+      "finalText": ""
     },
     {
       "turn": 2,
       "tools": [
-        "write"
-      ]
+        {
+          "name": "write",
+          "args": {
+            "path": "/tmp/bench-test/hello.txt",
+            "content": "Hello world"
+          },
+          "result": "{\"content\":[{\"type\":\"text\",\"text\":\"Successfully wrote 11 bytes to /tmp/bench-test/hello.txt\"}]}"
+        }
+      ],
+      "finalText": ""
     },
     {
       "turn": 3,
-      "tools": []
+      "tools": [],
+      "finalText": "Created `hello.txt` with the content \"Hello world\"."
     }
   ],
   "totalTools": 1
