@@ -1,0 +1,18 @@
+{
+  "task": "test-clean",
+  "instruction": "Say hi in 3 words",
+  "success": true,
+  "turns": [
+    {
+      "turn": 1,
+      "tools": [],
+      "finalText": ""
+    },
+    {
+      "turn": 2,
+      "tools": [],
+      "finalText": "Hello there, friend!"
+    }
+  ],
+  "totalTools": 0
+}

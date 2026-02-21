@@ -1,51 +1,23 @@
 /**
- * MySuperBoy Skill System
+ * Skill 系统
  * 
  * 支持懒加载：启动时只加载 SKILL.md 头部，按需读取完整内容
  */
 
-import type { ToolDefinition, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { TSchema, Static } from "@sinclair/typebox";
 import { readFileSync, existsSync, readdirSync, statSync } from "fs";
 import { join, basename } from "path";
 
 export interface SkillMeta {
-  /** Skill name */
   name: string;
-  /** Skill description */
   description: string;
-  /** Skill 目录路径 */
   path: string;
-}
-
-export interface Skill {
-  /** Skill name */
-  name: string;
-  /** Skill description */
-  description: string;
-  /** 完整文件路径 */
-  fullPath: string;
-  /** 工具（可选，需要时加载） */
-  tools?: SkillTool[];
-  /** 懒加载函数 */
-  load?: () => Promise<void>;
-}
-
-/**
- * 简化工具定义
- */
-export interface SkillTool {
-  name: string;
-  description: string;
-  parameters: TSchema;
-  execute: (params: Static<TSchema>, ctx: ExtensionContext) => Promise<{ text: string }>;
 }
 
 /**
  * Skill Manager - 懒加载系统
  */
 export class SkillManager {
-  private skills: Map<string, Skill> = new Map();
+  private skills: Map<string, SkillMeta> = new Map();
   private skillsDir: string;
 
   constructor(skillsDir: string) {
@@ -57,7 +29,7 @@ export class SkillManager {
    */
   async loadSkillsMeta(): Promise<void> {
     if (!existsSync(this.skillsDir)) {
-      console.error("⚠️ Skills directory not found:", this.skillsDir);
+      console.error(`⚠️ Skills directory not found: ${this.skillsDir}`);
       return;
     }
 
@@ -72,17 +44,13 @@ export class SkillManager {
         if (existsSync(skillFile)) {
           const meta = this.parseSkillHeader(skillFile, entry);
           if (meta) {
-            this.skills.set(entry, {
-              name: meta.name,
-              description: meta.description,
-              fullPath: skillFile
-            });
+            this.skills.set(entry, meta);
           }
         }
       }
     }
 
-    console.error(`✅ Loaded ${this.skills.size} skills (meta only)`);
+    console.error(`✅ Loaded ${this.skills.size} skills`);
   }
 
   /**
@@ -96,7 +64,7 @@ export class SkillManager {
       if (!content.startsWith("---")) {
         return {
           name: defaultName,
-          description: content.slice(0, 200), // 取前200字符作为描述
+          description: content.slice(0, 200),
           path: filePath
         };
       }
@@ -121,20 +89,16 @@ export class SkillManager {
 
       return { name, description, path: filePath };
     } catch (e) {
-      console.error("⚠️ Failed to parse skill:", filePath, e);
+      console.error(`⚠️ Failed to parse skill: ${filePath}`, e);
       return null;
     }
   }
 
   /**
-   * 获取所有 skill 元数据（用于告诉 LLM 有哪些 skills）
+   * 获取所有 skill 元数据
    */
   getSkillsMeta(): SkillMeta[] {
-    return Array.from(this.skills.values()).map(s => ({
-      name: s.name,
-      description: s.description,
-      path: s.fullPath
-    }));
+    return Array.from(this.skills.values());
   }
 
   /**
@@ -145,22 +109,15 @@ export class SkillManager {
     if (!skill) return null;
 
     try {
-      return readFileSync(skill.fullPath, "utf-8");
+      return readFileSync(skill.path, "utf-8");
     } catch (e) {
-      console.error("⚠️ Failed to read skill:", skill.fullPath, e);
+      console.error(`⚠️ Failed to read skill: ${skill.path}`, e);
       return null;
     }
   }
 
   /**
-   * 获取自定义工具（目前为空，后续可扩展）
-   */
-  getCustomTools(): ToolDefinition[] {
-    return [];
-  }
-
-  /**
-   * 生成 system prompt（告诉 LLM 有哪些 skills 可用）
+   * 生成 system prompt
    */
   getSystemPrompt(): string {
     const skills = this.getSkillsMeta();
@@ -171,13 +128,8 @@ export class SkillManager {
       lines.push(`- **${skill.name}**: ${skill.description}`);
       lines.push(`  - Path: ${skill.path}`);
     }
-    lines.push("", "When a user asks about a skill, read its full content using the read tool.");
+    lines.push("", "When user asks about a skill, read its full content using the read tool.");
 
     return lines.join("\n");
   }
-
-  /**
-   * 初始化（空实现，保留接口）
-   */
-  async init(): Promise<void> {}
 }

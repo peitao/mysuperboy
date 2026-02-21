@@ -1,0 +1,13 @@
+{
+  "task": "test-refactor",
+  "instruction": "Hello",
+  "success": false,
+  "turns": [
+    {
+      "turn": 1,
+      "tools": [],
+      "finalText": ""
+    }
+  ],
+  "totalTools": 0
+}
