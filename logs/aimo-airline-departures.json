@@ -1,0 +1,32 @@
+{
+  "task": "aimo-airline-departures",
+  "instruction": "Three airline companies operate flights from Dodola island. The first company departs every 100 days, the second every 120 days, third every 150 days. What is the greatest positive integer d for which there will be d consecutive days without a flight? Solve this problem and write the answer (just the number) to /tmp/bench-aimo-airline-departures/result.txt",
+  "success": true,
+  "turns": [
+    {
+      "turn": 1,
+      "tools": [],
+      "finalText": ""
+    },
+    {
+      "turn": 2,
+      "tools": [
+        {
+          "name": "write",
+          "args": {
+            "path": "/tmp/bench-aimo-airline-departures/result.txt",
+            "content": "100"
+          },
+          "result": "{\"content\":[{\"type\":\"text\",\"text\":\"Successfully wrote 3 bytes to /tmp/bench-aimo-airline-departures/result.txt\"}]}"
+        }
+      ],
+      "finalText": " 400, 450, 480, 500, 600\n\n**Step 3: Find the gaps**\n- 0 → 100: 100 days\n- 100 → 120: 20 days\n- 120 → 150: 30 days\n- 150 → 200: 50 days\n- 200 → 240: 40 days\n- 240 → 300: 60 days\n- 300 → 360: 60 days\n- 360 → 400: 40 days\n- 400 → 450: 50 days\n- 450 → 480: 30 days\n- 480 → 500: 20 days\n- 500 → 600: 100 days\n\nThe greatest gap is **100 days** (between day 500 and day 600, and also between day 0 and day 100).\n\nSince the pattern repeats every 600 days, this gap of 100 days occurs infinitely, so d = 100.\n"
+    },
+    {
+      "turn": 3,
+      "tools": [],
+      "finalText": "The answer has been written to the file. The greatest positive integer d for which there will be d consecutive days without a flight is 100.\nThe answer **100** has been written to `/tmp/bench-aimo-airline-departures/result.txt`."
+    }
+  ],
+  "totalTools": 1
+}
