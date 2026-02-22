@@ -9,6 +9,7 @@ import { getModel } from "@mariozechner/pi-ai";
 import { SkillManager } from "./skills/index.js";
 import { ConsoleLogger, FileLogger } from "./core/logger.js";
 import type { AgentOptions } from "./types.js";
+import { readFileSync, existsSync } from "fs";
 
 /**
  * 创建 Agent 并运行任务
@@ -102,8 +103,12 @@ async function main() {
       task = args[++i];
     } else if (args[i] === "-c" || args[i] === "--cwd") {
       cwd = args[++i];
+    } else if (args[i] === "-i" || args[i] === "--instruction-file") {
+      const file = args[++i];
+      if (existsSync(file)) {
+        instruction = readFileSync(file, "utf-8");
+      }
     } else if (args[i] === "-m" || args[i] === "--model") {
-      // 模型在 options 中处理
       i++;
     } else {
       instruction += args[i] + " ";
