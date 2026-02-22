@@ -55,6 +55,26 @@ export async function run(
           fileLogger?.textDelta(event.assistantMessageEvent.delta);
         }
         break;
+      case "message_start":
+        // 开始新的助手消息
+        if (event.message?.role === "assistant") {
+          fileLogger?.turnStart();
+        }
+        break;
+      case "message_end":
+        // 消息结束，保存完整内容
+        if (event.message?.role === "assistant" && event.message?.content) {
+          // 从 content 提取文本
+          const content = event.message.content;
+          if (Array.isArray(content)) {
+            for (const block of content) {
+              if (block.type === "output_text") {
+                fileLogger?.textDelta(block.text || "");
+              }
+            }
+          }
+        }
+        break;
       case "tool_execution_start":
         logger.tool(event.toolName, event.args);
         fileLogger?.toolStart(event.toolName, event.args);
@@ -83,6 +103,22 @@ export async function run(
 
   // 执行任务
   await session.prompt(instruction);
+
+  // 从 session.state.messages 获取完整输出
+  const assistantMessages = session.state.messages.filter((m) => m.role === "assistant");
+  console.error(`[debug] assistant messages: ${assistantMessages.length}`);
+  for (const msg of assistantMessages) {
+    console.error(`[debug] msg content:`, JSON.stringify(msg.content)?.slice(0, 500));
+    if (msg.content) {
+      if (Array.isArray(msg.content)) {
+        for (const block of msg.content) {
+          if (block.type === "output_text") {
+            fileLogger?.textDelta(block.text || "");
+          }
+        }
+      }
+    }
+  }
 
   // 保存日志
   fileLogger?.save();
@@ -125,4 +161,7 @@ async function main() {
   await run(instruction, { cwd, task, logging: true });
 }
 
-main();
+// 只在直接运行时执行
+if (process.argv[1]?.endsWith("index.ts")) {
+  main();
+}
